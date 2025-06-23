@@ -136,6 +136,7 @@ static ssize_t tfs_file_write(struct file *file, const char __user *ubuf,
     struct page *page = NULL;
     unsigned long offset;
     int ret;
+    struct inode *inode = file_inode(file);  // 新增：获取inode
     
     tfs_debug("tfs_file_write called: count=%zu, pos=%lld\n", count, *ppos);
     
@@ -173,6 +174,13 @@ static ssize_t tfs_file_write(struct file *file, const char __user *ubuf,
         spin_unlock(&tfs_ctx->lock);
         
         tfs_debug("Current queue size: %d\n", queue_count);
+        
+        // 更新文件大小
+        loff_t new_size = *ppos;
+        if (new_size > inode->i_size) {
+            i_size_write(inode, new_size);
+            tfs_debug("Updated file size to %lld bytes for empty write\n", new_size);
+        }
         
         // 唤醒用户态守护进程
         wake_up_interruptible(&tfs_ctx->wq);
@@ -255,6 +263,13 @@ static ssize_t tfs_file_write(struct file *file, const char __user *ubuf,
     list_add_tail(&xfer->list, &tfs_ctx->xfer_list);
     spin_unlock(&tfs_ctx->lock);
 
+    // 更新文件大小
+    loff_t new_size = *ppos + count;
+    if (new_size > inode->i_size) {
+        i_size_write(inode, new_size);  // 原子更新文件大小
+        tfs_debug("Updated file size to %lld bytes\n", new_size);
+    }
+
     // 唤醒用户态守护进程
     wake_up_interruptible(&tfs_ctx->wq);
     
@@ -331,23 +346,41 @@ static ssize_t tfs_file_read(struct file *file, char __user *buf,
 static int tfs_file_release(struct inode *inode, struct file *file)
 {
     struct tfs_inode_info *fsi = TFS_I(inode);
-    (void)fsi;  // 显式标记未使用
+    (void)fsi;
     
     tfs_debug("tfs_file_release called for inode %lu\n", inode->i_ino);
     
-    // 确保inode和文件指针有效
     if (!inode || !file) {
         tfs_error("NULL inode or file pointer in release\n");
         return -EINVAL;
     }
     
-    // 清理任何与文件相关的资源
-    if (tfs_ctx && tfs_ctx->current_xfer) {
+    // 加强锁保护和指针检查
+    if (tfs_ctx) {
         mutex_lock(&tfs_ctx->mmap_lock);
-        if (tfs_ctx->current_xfer->page) {
-            put_page(tfs_ctx->current_xfer->page);
+        
+        // 添加详细的调试信息
+        tfs_debug("Current transfer state: ctx=%px, xfer=%px, page=%px\n",
+                 tfs_ctx,
+                 tfs_ctx->current_xfer,
+                 tfs_ctx->current_xfer ? tfs_ctx->current_xfer->page : NULL);
+        
+        if (tfs_ctx->current_xfer) {
+            if (tfs_ctx->current_xfer->page) {
+                // 检查页面有效性
+                if (!PageHighMem(tfs_ctx->current_xfer->page) && 
+                    virt_addr_valid(page_address(tfs_ctx->current_xfer->page))) {
+                    put_page(tfs_ctx->current_xfer->page);
+                    tfs_debug("Page released successfully\n");
+                } else {
+                    tfs_error("Invalid page detected: %px\n", 
+                             tfs_ctx->current_xfer->page);
+                }
+                tfs_ctx->current_xfer->page = NULL;
+            }
+            kfree(tfs_ctx->current_xfer);
+            tfs_ctx->current_xfer = NULL;
         }
-        tfs_ctx->current_xfer = NULL;
         mutex_unlock(&tfs_ctx->mmap_lock);
     }
     
@@ -416,7 +449,14 @@ static int tfs_create(struct mnt_idmap *idmap, struct inode *dir,
     struct inode *inode;
     
     tfs_debug("tfs_create called for %s with mode %o\n", dentry->d_name.name, mode);
-    tfs_info("Creating new file: %s\n", dentry->d_name.name);
+    
+    // 检查文件是否已存在
+    if (d_really_is_positive(dentry)) {
+        tfs_debug("File %s already exists, skipping recreation\n", dentry->d_name.name);
+        return 0;
+    }
+    
+    tfs_info("Creating new file: %s with enforced mode 0666\n", dentry->d_name.name);
     
     // 创建新的inode
     inode = new_inode(dir->i_sb);

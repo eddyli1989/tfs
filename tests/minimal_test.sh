@@ -14,6 +14,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+rm *.log
+rm -rf /var/crash/*
+(cd tfs_client && make)
+(cd tfsd && make)
+
 # Logging functions
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1" | tee -a $LOG_FILE
