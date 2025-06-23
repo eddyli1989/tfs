@@ -50,11 +50,12 @@ static bool enable_zero_copy = true;
 
 // 传输数据结构
 struct tfs_xfer {
-    struct page *page;           // 物理页
-    off_t offset;                // 文件偏移
-    size_t size;                 // 数据大小
-    unsigned long pfn;           // 物理页帧号
-    struct list_head list;       // 链表节点
+    struct page *page;
+    off_t offset;
+    size_t size;
+    unsigned long pfn;
+    struct list_head list;
+    struct completion done; // 新增：用于同步
 };
 
 // IOCTL信息结构体
@@ -254,6 +255,7 @@ static ssize_t tfs_file_write(struct file *file, const char __user *ubuf,
     xfer->offset = *ppos;
     xfer->pfn = page_to_pfn(page);
     INIT_LIST_HEAD(&xfer->list);
+    init_completion(&xfer->done); // 新增
 
     tfs_debug("Created xfer: offset=%lld, size=%zu, pfn=%lu\n",
               (long long)xfer->offset, xfer->size, xfer->pfn);
@@ -272,7 +274,10 @@ static ssize_t tfs_file_write(struct file *file, const char __user *ubuf,
 
     // 唤醒用户态守护进程
     wake_up_interruptible(&tfs_ctx->wq);
-    
+
+    // 新增：等待tfsd处理完成
+    wait_for_completion_interruptible(&xfer->done);
+
     *ppos += count;
     return count;
 }
@@ -669,17 +674,21 @@ static long tfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
         return -ENODATA;
         
      case TFS_RELEASE_XFER:
-     tfs_debug("ioctl in tfs_client process TFS_RELEASE_XFER: cmd=0x%x\n", cmd);
-        // 正确释放队列头部的 transfer
         spin_lock(&tfs_ctx->lock);
         if (!list_empty(&tfs_ctx->xfer_list)) {
             struct tfs_xfer *xfer = list_first_entry(&tfs_ctx->xfer_list, struct tfs_xfer, list);
             list_del(&xfer->list);
+            spin_unlock(&tfs_ctx->lock);
+
+            // 唤醒等待的write
+            complete(&xfer->done);
+
             if (xfer->page)
                 put_page(xfer->page);
             kfree(xfer);
+        } else {
+            spin_unlock(&tfs_ctx->lock);
         }
-        spin_unlock(&tfs_ctx->lock);
         return 0;
     default:
         return -ENOTTY;
