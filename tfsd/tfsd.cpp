@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 
 // 日志文件路径
-#define LOG_FILE "/tmp/tfsd.log"
+#define LOG_FILE "./tfsd.log"
 std::ofstream log_file;
 
 // 是否启用详细日志

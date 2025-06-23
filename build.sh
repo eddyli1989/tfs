@@ -4,8 +4,8 @@ ACTION=${1:-all}
 
 run_kernel_build() {
     cd tfs_client
-    make -f Makefile.kernel clean
-    KERNELDIR=/usr/src/kernels/$(uname -r) make -f Makefile.kernel
+    make clean
+    KERNELDIR=/usr/src/kernels/$(uname -r) make
     cd ..
 }
 
