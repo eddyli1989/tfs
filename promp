@@ -1,0 +1,7 @@
+tfsd和tfs_client的通信似乎存在问题，在tfs_client的日志中，频繁打印2025-06-23 12:02:16 [ERROR] ioctl TFS_RELEASE_XFER failed: Inappropriate ioctl for device
+2025-06-23 12:02:16 [ERROR] ioctl TFS_RELEASE_XFER failed: Inappropriate ioctl for device
+[0;32m[INFO][0m File size after write: 0 bytes，而tfsd的日志中频繁打印2025-06-23 12:02:16 [INFO] Found 1 pending transfers
+2025-06-23 12:02:16 [INFO] Processing transfer - Offset: 0, Size: 4, PFN: 0x899754
+2025-06-23 12:02:16 [INFO] Content Preview: "\x00\x00\x00\x00"
+2025-06-23 12:02:16 [INFO] Verification: N/A OK
+2025-06-23 12:02:16 [ERROR] ioctl TFS_RELEASE_XFER failed: Inappropriate ioctl for device，请分析并修复
