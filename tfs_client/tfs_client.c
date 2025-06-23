@@ -587,7 +587,7 @@ static long tfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
         if (!arg) {
             return -EINVAL;
         }
-        
+        tfs_debug("ioctl in tfs_client process TFS_GET_XFER_COUNT: cmd=0x%x\n", cmd);
         spin_lock(&tfs_ctx->lock);
         list_for_each_entry(xfer, &tfs_ctx->xfer_list, list)
             count++;
@@ -604,6 +604,7 @@ static long tfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
             return -EINVAL;
         }
         
+        tfs_debug("ioctl in tfs_client process TFS_GET_XFER_INFO: cmd=0x%x\n", cmd);
         spin_lock(&tfs_ctx->lock);
         if (!list_empty(&tfs_ctx->xfer_list)) {
             xfer = list_first_entry(&tfs_ctx->xfer_list,
@@ -627,9 +628,23 @@ static long tfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
         spin_unlock(&tfs_ctx->lock);
         return -ENODATA;
         
+     case TFS_RELEASE_XFER:
+     tfs_debug("ioctl in tfs_client process TFS_RELEASE_XFER: cmd=0x%x\n", cmd);
+        // 正确释放队列头部的 transfer
+        spin_lock(&tfs_ctx->lock);
+        if (!list_empty(&tfs_ctx->xfer_list)) {
+            struct tfs_xfer *xfer = list_first_entry(&tfs_ctx->xfer_list, struct tfs_xfer, list);
+            list_del(&xfer->list);
+            if (xfer->page)
+                put_page(xfer->page);
+            kfree(xfer);
+        }
+        spin_unlock(&tfs_ctx->lock);
+        return 0;
     default:
         return -ENOTTY;
     }
+    return 0;
 }
 
 // 实现mmap操作
