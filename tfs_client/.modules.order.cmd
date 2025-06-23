@@ -1,1 +1,0 @@
-cmd_/home/lishuai/code/tfs_distributed_fs/tfs_client/modules.order := {   echo /home/lishuai/code/tfs_distributed_fs/tfs_client/tfs_client.ko; :; } | awk '!x[$$0]++' - > /home/lishuai/code/tfs_distributed_fs/tfs_client/modules.order

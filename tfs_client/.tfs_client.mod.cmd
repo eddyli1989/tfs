@@ -1,1 +1,0 @@
-cmd_/home/lishuai/code/tfs_distributed_fs/tfs_client/tfs_client.mod := printf '%s\n'   tfs_client.o | awk '!x[$$0]++ { print("/home/lishuai/code/tfs_distributed_fs/tfs_client/"$$0) }' > /home/lishuai/code/tfs_distributed_fs/tfs_client/tfs_client.mod
