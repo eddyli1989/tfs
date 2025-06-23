@@ -1,0 +1,1 @@
+cmd_/home/lishuai/code/tfs_distributed_fs/tfs_client/Module.symvers := sed 's/ko$$/o/' /home/lishuai/code/tfs_distributed_fs/tfs_client/modules.order | scripts/mod/modpost -m -a  -o /home/lishuai/code/tfs_distributed_fs/tfs_client/Module.symvers -e -i Module.symvers   -T -

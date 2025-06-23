@@ -1,0 +1,75 @@
+===== TFS Minimal Test =====
+Starting test at 2025年 06月 23日 星期一 09:48:14 CST
+[0;32m[INFO][0m Saved initial kernel log to /tmp/kernel_log_before_crash.txt
+[0;32m[INFO][0m Setting up test environment...
+[0;32m[INFO][0m Environment setup completed
+[0;32m[INFO][0m Checking kernel logs at checkpoint: after_setup
+[0;32m[INFO][0m TFS related logs at checkpoint after_setup:
+[0;31m[ERROR][0m Kernel errors detected at checkpoint: after_setup
+Critical errors found:
+[    8.510440] systemd[1]: Mounted Kernel Debug File System.
+[0;32m[INFO][0m Step 1: Loading kernel module
+[0;32m[INFO][0m Loading kernel module...
+[0;32m[INFO][0m Kernel module loaded successfully
+[0;32m[INFO][0m Checking kernel logs at checkpoint: after_module_load
+[0;32m[INFO][0m TFS related logs at checkpoint after_module_load:
+  [ 1090.888028] tfs_client: loading out-of-tree module taints kernel.
+  [ 1090.888045] tfs_client: module verification failed: signature and/or required key missing - tainting kernel
+  [ 1090.888405] TFS INFO: Initializing TFS module
+  [ 1090.888765] TFS INFO: TFS module loaded successfully
+[1;33m[WARN][0m Kernel warnings detected at checkpoint: after_module_load
+Warnings found:
+[   10.164680] Warning: Unmaintained driver is detected: ip_set
+[0;32m[INFO][0m Kernel log check completed at checkpoint: after_module_load
+[0;32m[INFO][0m Step 1 completed successfully
+[0;32m[INFO][0m Step 2: Mounting filesystem
+[0;32m[INFO][0m Mounting TFS filesystem...
+[0;32m[INFO][0m Mounted TFS at /mnt/tfs_test
+[0;32m[INFO][0m Checking kernel logs at checkpoint: after_mount
+[0;32m[INFO][0m TFS related logs at checkpoint after_mount:
+  [ 1090.888028] tfs_client: loading out-of-tree module taints kernel.
+  [ 1090.888045] tfs_client: module verification failed: signature and/or required key missing - tainting kernel
+  [ 1090.888405] TFS INFO: Initializing TFS module
+  [ 1090.888765] TFS INFO: TFS module loaded successfully
+  [ 1094.973995] TFS DEBUG: init_fs_context called
+  [ 1094.974027] TFS DEBUG: get_tree called
+  [ 1094.974052] TFS DEBUG: fill_super called
+  [ 1094.974082] TFS DEBUG: alloc_inode called
+  [ 1094.974094] TFS DEBUG: Superblock filled successfully
+  [ 1094.975206] TFS DEBUG: free_fc called
+[1;33m[WARN][0m Kernel warnings detected at checkpoint: after_mount
+Warnings found:
+[   10.164680] Warning: Unmaintained driver is detected: ip_set
+[0;32m[INFO][0m Kernel log check completed at checkpoint: after_mount
+[0;32m[INFO][0m Step 2 completed successfully
+[0;32m[INFO][0m Step 3: Starting daemon
+[0;32m[INFO][0m Starting TFS daemon...
+[0;32m[INFO][0m Daemon started (PID 8812)
+[0;32m[INFO][0m Checking kernel logs at checkpoint: after_daemon_start
+[0;32m[INFO][0m TFS related logs at checkpoint after_daemon_start:
+  [ 1090.888028] tfs_client: loading out-of-tree module taints kernel.
+  [ 1090.888045] tfs_client: module verification failed: signature and/or required key missing - tainting kernel
+  [ 1090.888405] TFS INFO: Initializing TFS module
+  [ 1090.888765] TFS INFO: TFS module loaded successfully
+  [ 1094.973995] TFS DEBUG: init_fs_context called
+  [ 1094.974027] TFS DEBUG: get_tree called
+  [ 1094.974052] TFS DEBUG: fill_super called
+  [ 1094.974082] TFS DEBUG: alloc_inode called
+  [ 1094.974094] TFS DEBUG: Superblock filled successfully
+  [ 1094.975206] TFS DEBUG: free_fc called
+  [ 1099.089086] TFS DEBUG: ioctl called: cmd=0x80045400
+  [ 1099.089099] TFS DEBUG: poll called, mask=0
+  [ 1100.090667] TFS DEBUG: poll called, mask=0
+  [ 1100.090699] TFS DEBUG: ioctl called: cmd=0x80045400
+  [ 1100.090707] TFS DEBUG: poll called, mask=0
+  [ 1101.091672] TFS DEBUG: poll called, mask=0
+  [ 1101.091712] TFS DEBUG: ioctl called: cmd=0x80045400
+  [ 1101.091720] TFS DEBUG: poll called, mask=0
+[1;33m[WARN][0m Kernel warnings detected at checkpoint: after_daemon_start
+Warnings found:
+[   10.164680] Warning: Unmaintained driver is detected: ip_set
+[0;32m[INFO][0m Kernel log check completed at checkpoint: after_daemon_start
+[0;32m[INFO][0m Step 3 completed successfully
+[0;32m[INFO][0m Step 4: Creating empty file
+[0;32m[INFO][0m Testing minimal file creation...
+[0;32m[INFO][0m Creating empty file: /mnt/tfs_test/minimal.txt

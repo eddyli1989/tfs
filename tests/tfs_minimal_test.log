@@ -1,0 +1,15 @@
+===== TFS Minimal Test =====
+Starting test at 2025年 06月 22日 星期日 22:00:03 CST
+[0;32m[INFO][0m Saved initial kernel log to /tmp/kernel_log_before_crash.txt
+[0;32m[INFO][0m Setting up test environment...
+[0;32m[INFO][0m Environment setup completed
+[0;32m[INFO][0m Checking kernel logs at checkpoint: after_setup
+[0;31m[ERROR][0m Kernel errors detected at checkpoint: after_setup
+[   14.815569] Warning: Unmaintained driver is detected: ip_set
+[0;32m[INFO][0m Step 1: Loading kernel module
+[0;32m[INFO][0m Loading kernel module...
+[0;31m[ERROR][0m Kernel module file not found. Building...
+./minimal_test.sh: 第 109 行：cd: tfs_client: 没有那个文件或目录
+[0;31m[ERROR][0m Failed to build kernel module
+[0;32m[INFO][0m Cleaning up...
+[0;32m[INFO][0m Cleanup completed
